@@ -54,7 +54,14 @@ class GridModifier:
         return merg_list
 
     @staticmethod
-    def relaxation(polygon_list):
-        raise NotImplemented
-
+    def unify_vertex(polygon_list):
+        vertex_uniq = {}
+        for poly in polygon_list:
+            for idx, vertex in enumerate(poly.vertex_list):
+                if vertex not in vertex_uniq:
+                    vertex_uniq[vertex] = vertex
+                else:
+                    vertex = vertex_uniq[vertex]
+                poly.vertex_list[idx] = vertex
+        return polygon_list
 

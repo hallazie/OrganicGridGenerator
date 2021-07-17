@@ -17,6 +17,7 @@ class GridGeneration:
         triangular = Delaunay(point_list)
         vertex_list = [Vertex(x[0], x[1]) for x in triangular.points]
         poly_list = [Polygon([vertex_list[x[0]], vertex_list[x[1]], vertex_list[x[2]]]) for x in triangular.simplices]
+        
         return poly_list
 
     def generate(self, vertex_list, method='delaunay'):

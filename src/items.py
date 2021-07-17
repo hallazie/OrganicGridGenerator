@@ -1,6 +1,8 @@
 # coding:utf-8
 # @author: xiao shanghua
 
+from utils.common import euc_distance
+
 import functools
 
 
@@ -28,15 +30,28 @@ class Polygon:
         QUAD for quad
         OTHER for others
     """
-    def __init__(self, vertex_list, typ_='TRI'):
+    def __init__(self, vertex_list, typ_='QUAD'):
         self.vertex_list = vertex_list
         self.type = typ_
         self._center = None
+        self._side_length = None
         self.sort_vertex_clockwise()
 
     @property
     def center(self):
+        """
+        center
+        :return:
+        """
         return self._center
+
+    @property
+    def side_length(self):
+        """
+        side size
+        :return:
+        """
+        return self._side_length
 
     @center.getter
     def center(self):
@@ -47,9 +62,28 @@ class Polygon:
         return self._center
 
     @center.setter
-    def center(self, val):
-        if type(val) is Vertex:
-            self._center = val
+    def center(self, _):
+        print(f'attribute "center" does not support value assignment')
+
+    @side_length.getter
+    def side_length(self):
+        if self._side_length is None:
+            self._side_length = 0
+            vertex_list = [x for x in self.vertex_list]
+            vertex_list.append(self.vertex_list[0])
+            for i in range(len(self.vertex_list)):
+                v1, v2 = vertex_list[i], vertex_list[i + 1]
+                self._side_length += euc_distance(v1, v2)
+        return self._side_length
+
+    @side_length.setter
+    def side_length(self, _):
+        print(f'attribute "side_length" does not support value assignment')
+
+    def recalc_center(self):
+        center_x = sum([v.x for v in self.vertex_list]) / float(len(self.vertex_list))
+        center_y = sum([v.y for v in self.vertex_list]) / float(len(self.vertex_list))
+        self._center = Vertex(center_x, center_y)
 
     def _clockwise_dist(self, x, y):
         return (x.x - self.center.x) * (y.y - self.center.y) - (y.x - self.center.x) * (x.y - self.center.y)

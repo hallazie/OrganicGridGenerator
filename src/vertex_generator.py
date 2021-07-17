@@ -74,4 +74,6 @@ class VertexGeneration:
         else:
             raise ValueError(f'generate vertex {method} not supported (hexagon / binomial / gaussian / poisson)')
 
+    def random_jitter(self, vertex_list, jitter=0.1):
+        pass
 
