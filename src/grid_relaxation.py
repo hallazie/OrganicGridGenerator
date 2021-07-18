@@ -9,6 +9,8 @@ import math
 class GridRelaxation:
     def __init__(self):
         self.learning_rate = 0.1
+        self.alpha_cache = {}
+        self.alpha_fix = True
 
     @staticmethod
     def _first_derivative(polygon: Polygon, alpha):
@@ -44,14 +46,14 @@ class GridRelaxation:
             return 0.
         v1, v2, v3, v4 = polygon.vertex_list
         numerator = float(v1.y + v2.x - v3.y - v4.x)
-        denominator = float(v1.x - v2.y + v3.x + v4.y)
+        denominator = float(v1.x - v2.y - v3.x + v4.y)
         if denominator == 0:
             # already orthogonal, directly return 0
             return 0.
         const = math.atan(numerator / denominator)
-        alpha1, alpha2 = const + math.pi, const - math.pi
+        alpha1, alpha2 = const, const + math.pi
         second_derive = self._second_derive(polygon, alpha1, radius)
-        if second_derive < 0:
+        if second_derive > 0:
             return alpha1
         else:
             return alpha2
@@ -80,15 +82,22 @@ class GridRelaxation:
         for poly in polygon_list:
             for vertex in poly.vertex_list:
                 differentiat[id(vertex)] = {'x': [], 'y': []}
+
         for poly in polygon_list:
             center = poly.center
             # radius = (poly.side_length / 8.) * math.sqrt(2)
             radius = sorted([euc_distance(center, v) for v in poly.vertex_list])[0] * 0.8
-            alpha = self._arg_min_alpha(poly, radius)
+            if id(poly) not in self.alpha_cache or not self.alpha_fix:
+                alpha = self._arg_min_alpha(poly, radius)
+                self.alpha_cache[id(poly)] = alpha
+            alpha = self.alpha_cache[id(poly)]
             v1, v2, v3, v4 = self._corner_coords(center, alpha, radius)
             align_list = self._align_to_vertex(poly, [v1, v2, v3, v4])
             v1, v2, v3, v4 = align_list
-            # TODO fix p1->v1, p2->v2, etc. mapping
+            # import matplotlib.pyplot as plt
+            # plt.scatter([v1.x, v2.x, v3.x, v4.x], [v1.y, v2.y, v3.y, v4.y])
+            # plt.scatter([x.x for x in poly.vertex_list], [x.y for x in poly.vertex_list])
+            # plt.show()
             differentiat[id(poly.vertex_list[0])]['x'].append((v1.x - poly.vertex_list[0].x) * self.learning_rate)
             differentiat[id(poly.vertex_list[0])]['y'].append((v1.y - poly.vertex_list[0].y) * self.learning_rate)
             differentiat[id(poly.vertex_list[1])]['x'].append((v2.x - poly.vertex_list[1].x) * self.learning_rate)
@@ -111,7 +120,8 @@ class GridRelaxation:
             # only used for quad relaxation
             return polygon
         center = polygon.center
-        radius = (polygon.side_length / 8.) * math.sqrt(2)
+        # radius = (polygon.side_length / 8.) * math.sqrt(2)
+        radius = 0.5
         alpha = self._arg_min_alpha(polygon, radius)
         v1, v2, v3, v4 = self._corner_coords(center, alpha, radius)
         polygon.vertex_list[0].x = polygon.vertex_list[0].x + (v1.x - polygon.vertex_list[0].x) * self.learning_rate

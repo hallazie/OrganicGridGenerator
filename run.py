@@ -21,15 +21,15 @@ def plot_polygon_grid(polygon_list_, vertex_list_=None):
         for i in range(len(vert)-1):
             plt.plot([vert[i].x, vert[i+1].x], [vert[i].y, vert[i+1].y])
             # plt.arrow(vert[i].x, vert[i].y, vert[i+1].x-vert[i].x, vert[i+1].y-vert[i].y, head_width=0.05, head_length=0.1, fc='k', ec='k')
-    if not vertex_list_:
-        vertex_list_ = set()
-        for poly in polygon_list_:
-            for vertex in poly.vertex_list:
-                if vertex not in vertex_list_:
-                    vertex_list_.add(vertex)
-        vertex_list_ = list(vertex_list_)
-    point_list = np.array([(x.x, x.y) for x in vertex_list_])
-    plt.plot(point_list[:, 0], point_list[:, 1], 'o')
+    # if not vertex_list_:
+    #     vertex_list_ = set()
+    #     for poly in polygon_list_:
+    #         for vertex in poly.vertex_list:
+    #             if vertex not in vertex_list_:
+    #                 vertex_list_.add(vertex)
+    #     vertex_list_ = list(vertex_list_)
+    # point_list = np.array([(x.x, x.y) for x in vertex_list_])
+    # plt.plot(point_list[:, 0], point_list[:, 1], 'o')
 
 
 def randomize_polygon_vertex_by_jitter(p_list, jitter=0.1):
@@ -48,6 +48,7 @@ def plot_animation():
     polygon_total = []
 
     vertex_list = vg.generate('hexagon', layer=3)
+    # vertex_list = vg.generate('poisson', width=10, height=10)
     polygon_list = gg.generate(vertex_list)
     polygon_list = gm.random_merge(polygon_list, 0.125)
     polygon_list = gm.split_to_quads(polygon_list)
@@ -57,7 +58,7 @@ def plot_animation():
 
     for i in range(100):
         polygon_total.append(copy.deepcopy(polygon_list))
-        polygon_list = gr.relaxation(polygon_list, epochs=1, learning_rate=0.025)
+        polygon_list = gr.relaxation(polygon_list, epochs=1, learning_rate=0.05)
 
     def plot_animation_call(idx):
         ax.clear()
@@ -74,19 +75,19 @@ def plot_animation():
 
 def plot_static():
     vg, gg, gm, gr = VertexGeneration(), GridGeneration(), GridModifier(), GridRelaxation()
-    vertex_list = vg.generate('hexagon', layer=3)
+    vertex_list = vg.generate('hexagon', layer=15)
     polygon_list = gg.generate(vertex_list)
-    polygon_list = gm.random_merge(polygon_list, 0.125)
+    polygon_list = gm.random_merge(polygon_list, 0.5)
     polygon_list = gm.split_to_quads(polygon_list)
     polygon_list = gm.unify_vertex(polygon_list)
-    polygon_list = gr.relaxation(polygon_list, epochs=70, learning_rate=0.05)
+    polygon_list = gr.relaxation(polygon_list, epochs=100, learning_rate=0.05)
     # polygon_list = [Polygon([Vertex(0, 0), Vertex(1.7, 0.7), Vertex(2, 2), Vertex(0.7, 1.7)])]
     plot_polygon_grid(polygon_list)
     plt.show()
 
 
 if __name__ == '__main__':
-    plot_animation()
+    plot_static()
 
 
 
