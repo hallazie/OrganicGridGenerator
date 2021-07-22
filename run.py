@@ -47,7 +47,7 @@ def plot_animation():
 
     polygon_total = []
 
-    vertex_list = vg.generate('hexagon', layer=3)
+    vertex_list = vg.generate('hexagon', layer=5)
     # vertex_list = vg.generate('poisson', width=10, height=10)
     polygon_list = gg.generate(vertex_list)
     polygon_list = gm.random_merge(polygon_list, 0.125)
@@ -58,7 +58,7 @@ def plot_animation():
 
     for i in range(100):
         polygon_total.append(copy.deepcopy(polygon_list))
-        polygon_list = gr.relaxation(polygon_list, epochs=1, learning_rate=0.05)
+        polygon_list = gr.relaxation(polygon_list, epochs=1, learning_rate=0.05, verbose=True)
 
     def plot_animation_call(idx):
         ax.clear()
@@ -68,9 +68,9 @@ def plot_animation():
             for j in range(len(vert)-1):
                 plt.plot([vert[j].x, vert[j+1].x], [vert[j].y, vert[j+1].y])
 
-    animator = ani.FuncAnimation(fig, plot_animation_call, interval=20)
-    # animator.save('output//grid-generation.gif')
-    plt.show()
+    animator = ani.FuncAnimation(fig, plot_animation_call, interval=50)
+    animator.save('output/output-hex.gif', writer='pillow')
+    # plt.show()
 
 
 def plot_static():
@@ -88,7 +88,7 @@ def plot_static():
 
 
 if __name__ == '__main__':
-    plot_static()
+    plot_animation()
 
 
 

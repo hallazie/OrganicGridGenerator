@@ -4,4 +4,4 @@ inspired by Oskar Stalberg's townscaper
 
 a example output:
 
-![](https://github.com/hallazie/OrganicGridGenerator/blob/master/output/output-hex.png)
+![alt text](https://github.com/hallazie/OrganicGridGenerator/blob/master/output/output-hex.gif "organic grid generation sample")
