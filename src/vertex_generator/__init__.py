@@ -4,6 +4,7 @@
 from src.items import *
 from src.vertex_generator.hexagon import HexagonGrow
 from src.vertex_generator.poisson_disc import PoissonDiscSample
+from src.vertex_generator.orthogonal import OrthogonalGridGenerator
 
 import math
 import sys
@@ -16,15 +17,7 @@ class VertexGeneration:
     def __init__(self):
         self.hexagon_sampler = None
         self.poisson_disc_sampler = None
-
-    def _gen_binomial(self, **kw_args):
-        raise NotImplemented
-
-    def _gen_gaussian(self, **kw_args):
-        raise NotImplemented
-
-    def _gen_poisson(self, **kw_args):
-        raise NotImplemented
+        self.orthogonal_sampler = None
 
     def generate(self, method='hexagon', **args):
         """
@@ -40,13 +33,17 @@ class VertexGeneration:
                 self.hexagon_sampler = HexagonGrow()
             return self.hexagon_sampler.generate(**args)
         elif method == 'binomial':
-            return self._gen_binomial(**args)
+            raise NotImplemented
         elif method == 'gaussian':
-            return self._gen_gaussian(**args)
+            raise NotImplemented
         elif method == 'poisson':
             if self.poisson_disc_sampler is None:
                 self.poisson_disc_sampler = PoissonDiscSample()
             return self.poisson_disc_sampler.generate(**args)
+        elif method == 'orthogonal':
+            if self.orthogonal_sampler is None:
+                self.orthogonal_sampler = OrthogonalGridGenerator()
+            return self.orthogonal_sampler.generate(**args)
         else:
             raise ValueError(f'generate vertex {method} not supported (hexagon / binomial / gaussian / poisson)')
 

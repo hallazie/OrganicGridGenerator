@@ -11,6 +11,7 @@ class GridRelaxation:
         self.learning_rate = 0.1
         self.alpha_cache = {}
         self.alpha_fix = True
+        self.epochs = 0
 
     @staticmethod
     def _first_derivative(polygon: Polygon, alpha):
@@ -77,12 +78,23 @@ class GridRelaxation:
         else:
             return poly.vertex_list
 
-    def relax_single_step_update(self, polygon_list):
+    @staticmethod
+    def _get_corner_dist(poly: Polygon, align_list):
+        if len(poly.vertex_list) != len(align_list):
+            print(f'poly size={len(poly.vertex_list)}, align size: {len(align_list)}')
+            return 0
+        dist = 0
+        for x, y in zip(poly.vertex_list, align_list):
+            dist += euc_distance(x, y)
+        return dist
+
+    def relax_single_step_update(self, polygon_list, ep, verbose):
         differentiat = {}
         for poly in polygon_list:
             for vertex in poly.vertex_list:
                 differentiat[id(vertex)] = {'x': [], 'y': []}
 
+        accum_dist = 0
         for poly in polygon_list:
             center = poly.center
             # radius = (poly.side_length / 8.) * math.sqrt(2)
@@ -94,6 +106,8 @@ class GridRelaxation:
             v1, v2, v3, v4 = self._corner_coords(center, alpha, radius)
             align_list = self._align_to_vertex(poly, [v1, v2, v3, v4])
             v1, v2, v3, v4 = align_list
+            corner_dist = self._get_corner_dist(poly, align_list)
+            accum_dist += corner_dist
             # import matplotlib.pyplot as plt
             # plt.scatter([v1.x, v2.x, v3.x, v4.x], [v1.y, v2.y, v3.y, v4.y])
             # plt.scatter([x.x for x in poly.vertex_list], [x.y for x in poly.vertex_list])
@@ -106,6 +120,8 @@ class GridRelaxation:
             differentiat[id(poly.vertex_list[2])]['y'].append((v3.y - poly.vertex_list[2].y) * self.learning_rate)
             differentiat[id(poly.vertex_list[3])]['x'].append((v4.x - poly.vertex_list[3].x) * self.learning_rate)
             differentiat[id(poly.vertex_list[3])]['y'].append((v4.y - poly.vertex_list[3].y) * self.learning_rate)
+        if verbose:
+            print(f'{ep} / {self.epochs} step, current loss={accum_dist}')
         for idx in differentiat:
             differentiat[idx]['x'] = (sum(differentiat[idx]['x']) / len(differentiat[idx]['x'])) if differentiat[idx]['x'] else 0
             differentiat[idx]['y'] = (sum(differentiat[idx]['y']) / len(differentiat[idx]['y'])) if differentiat[idx]['y'] else 0
@@ -133,13 +149,12 @@ class GridRelaxation:
         polygon.vertex_list[3].x = polygon.vertex_list[3].x + (v4.x - polygon.vertex_list[3].x) * self.learning_rate
         polygon.vertex_list[3].y = polygon.vertex_list[3].y + (v4.y - polygon.vertex_list[3].y) * self.learning_rate
 
-    def relaxation(self, polygon_list, epochs=10, learning_rate=None):
+    def relaxation(self, polygon_list, epochs=10, learning_rate=None, verbose=True):
         if learning_rate:
             self.learning_rate = learning_rate
+        self.epochs = epochs
         for ep in range(epochs):
-            # for idx in range(len(polygon_list)):
-            #     self.relax_single_polygon_by_step(polygon_list[idx])
-            self.relax_single_step_update(polygon_list)
+            self.relax_single_step_update(polygon_list, ep, verbose)
         return polygon_list
 
 

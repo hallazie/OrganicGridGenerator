@@ -75,12 +75,13 @@ def plot_animation():
 
 def plot_static():
     vg, gg, gm, gr = VertexGeneration(), GridGeneration(), GridModifier(), GridRelaxation()
-    vertex_list = vg.generate('hexagon', layer=15)
+    vertex_list = vg.generate('hexagon', layer=6)
+    # vertex_list = vg.generate('orthogonal', height=15, width=20, jitter=0.0)
     polygon_list = gg.generate(vertex_list)
-    polygon_list = gm.random_merge(polygon_list, 0.5)
+    polygon_list = gm.random_merge(polygon_list, 0.2)
     polygon_list = gm.split_to_quads(polygon_list)
     polygon_list = gm.unify_vertex(polygon_list)
-    polygon_list = gr.relaxation(polygon_list, epochs=100, learning_rate=0.05)
+    polygon_list = gr.relaxation(polygon_list, epochs=50, learning_rate=0.05)
     # polygon_list = [Polygon([Vertex(0, 0), Vertex(1.7, 0.7), Vertex(2, 2), Vertex(0.7, 1.7)])]
     plot_polygon_grid(polygon_list)
     plt.show()
